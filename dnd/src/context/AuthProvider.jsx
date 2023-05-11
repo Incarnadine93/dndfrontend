@@ -59,6 +59,7 @@ export const AuthProvider = ({ children }) => {
             error: 'Rolled a 1! Failed to sign out',
         });
     }
+
     
     useEffect(() => {
         onAuthStateChanged(auth, (userInfo) => {

@@ -2,256 +2,389 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { WEB_URL } from "../lib/CONSTANTS";
+import { toast } from 'react-hot-toast';
 
 const EncounterView = () => {
-  const [monsters, setMonsters] = useState([]);
-  const [characters, setCharacters] = useState([]);
-  const [isplayersSelected, setIsPlayersSelected] = useState(false);
-  const [selectedTypes, setSelectedTypes] = useState([]);
-  const [playerLevels, setPlayerLevels] = useState([]);
-  const [generatedMonsters, setGeneratedMonsters] = useState([]);
+    const [encounterData, setEncounterData] = useState({ level: [], type: [], difficulty: '' });
+    const [ characters, setCharacters ] = useState([]);
+    const [ monsters, setMonsters ] = useState([]);
+    const [ xpThresholds, setXpThresholds ] = useState([]);
+    const [ isPlayersSelected, setIsPlayersSelected ] = useState(false);
+    const [ isMonTypesSelected, setIsMonTypesSelected ] = useState(false);
+    const [ isDifficultySelected, setIsDifficultySelected ] = useState(false);
+    const [ generatedMonsters, setGeneratedMonsters ] = useState([]);
 
+    useEffect(() => {
+        const getCharacters = async () => {
+            const res = await axios.get(WEB_URL + "/characters");
+            console.log("res");
+            console.log(res.data);
+            if (res.data.status === "ok") {
+                const newCharacters = res.data.data;
+                setCharacters(newCharacters);
+            }
+        };
+        getCharacters();
+    }, []);
 
+    useEffect(() => {
+        const getMonsters = async () => {
+            const res = await axios.get(WEB_URL + "/monsters");
+            console.log("res");
+            console.log(res.data);
+            if (res.data.status === "ok") {
+                const newMonsters = res.data;
+                setMonsters(newMonsters);
+            }
+        };
+        getMonsters();
+    }, []);
 
-  useEffect(() => {
-    const getMonsters = async () => {
-      const res = await axios.get(WEB_URL + "/monsters");
-      console.log("res");
-      console.log(res.data);
-      if (res.data.status === "ok") {
-        const newMonsters = res.data;
-        setMonsters(newMonsters);
+    useEffect(() => {
+        const getXpThresholds = async () => {
+            const res = await axios.get(WEB_URL + "/xpthreshholds");
+            console.log("res");
+            console.log(res.data);
+            if (res.data.status === "ok") {
+                const newXpThresholds = res.data;
+                setXpThresholds(newXpThresholds);
+            }
+        };
+        getXpThresholds();
+    }, []);
+
+    const handlePlayerSelection = (level) => {
+      console.log("handlePlayerSelection");
+      console.log(level);
+      setEncounterData((prevData) => {
+        if (prevData.level.includes(level)) {
+          // Remove the selected level from the encounterData array
+          return { ...prevData, level: prevData.level.filter((l) => l !== level) };
+        } else {
+          // Add the selected level to the encounterData array
+          return { ...prevData, level: [...prevData.level, level] };
+        }
+      });
+    };
+
+    const handleTypeSelection = (type) => {
+      console.log(encounterData)
+      setEncounterData((prevData) => {
+        if (prevData.type && prevData.type.includes(type)) {
+          // Remove the selected type from the encounterData array
+          return {
+            ...prevData,
+            type: prevData.type.filter((t) => t !== type)
+          };
+        } else {
+          // Add the selected type to the encounterData array
+          return {
+            ...prevData,
+            type: [...(prevData.type || []), type]
+          };
+        }
+      });
+    };
+
+    const handleDifficultySelection = (difficulty) => {
+      console.log(encounterData)
+      setEncounterData((prevData) => {
+        if (prevData.difficulty && prevData.difficulty.includes(difficulty)) {
+          // Remove the selected difficulty from the encounterData
+          return {
+            ...prevData,
+            difficulty: prevData.difficulty.filter((d) => d !== difficulty),
+          };
+        } else {
+          // Add or update the selected difficulty in the encounterData
+          return {
+            ...prevData,
+            difficulty: [difficulty],
+          };
+        }
+      });
+    };
+
+    const handleGenerateEncounter = async () => {
+      console.log("encounterData");
+      console.log(encounterData);
+    
+      const numPlayers = encounterData.level.length;
+      console.log("numPlayers:", numPlayers);
+    
+      const avgLevel = Math.round(encounterData.level.reduce((a, b) => a + b, 0) / encounterData.level.length);
+      console.log("avgLevel:", avgLevel);
+    
+      const difficulty = encounterData.difficulty[0].toLowerCase();
+      console.log("difficulty:", difficulty);
+    
+      console.log("xpThresholds:", xpThresholds);
+      const difficultyXp = xpThresholds.data[avgLevel + 1][difficulty];
+      console.log("difficultyXp:", difficultyXp);
+    
+      const encounterXp = difficultyXp * numPlayers;
+      console.log("encounterXp:", encounterXp);
+    
+      const monTypes = encounterData.type;
+      console.log("monTypes:", monTypes);
+      console.log("monsters:", monsters.data)
+      const mons = monsters.data.filter((m) => monTypes.includes(m.type));
+      console.log("mons:", mons);
+      // const mons = monsters.filter((m) => monTypes.includes(m.type));
+      // console.log("mons:", mons);
+    
+      for (let m = 0; m < mons.length; m++) {
+        const monster = mons[m];
+        if (monster.xp <= encounterXp) {
+          setGeneratedMonsters((prevData) => [...prevData, monster]);
+        }
       }
     };
-    getMonsters();
-  }, []);
+    
 
-  useEffect(() => {
-    const getCharacters = async () => {
-      const res = await axios.get(WEB_URL + "/characters");
-      console.log("res");
-      console.log(res.data);
-      if (res.data.status === "ok") {
-        const newCharacters = res.data.data;
-        setCharacters(newCharacters);
-      }
-    };
-    getCharacters();
-  }, []);
 
-  const handlePlayerSelection = (level) => {
-    if (playerLevels.includes(level)) {
-      setPlayerLevels([]);
-    } else {
-      setPlayerLevels([level]);
-    }
-  };
-
-  const handleTypeSelection = (type) => {
-    if (selectedTypes.includes(type)) {
-      setSelectedTypes(selectedTypes.filter((t) => t !== type));
-    } else {
-      setSelectedTypes([...selectedTypes, type]);
-    }
-  };
-
-  const generateMonsterSet = (levels, types, difficulty) => {
-    const filteredMonsters = monsters.filter(monster => types.includes(monster.type) && levels.includes(monster.challenge_rating));
-    const numPlayers = levels.length;
-    const difficultyMultiplier = {
-      easy: 0.5,
-      medium: 1,
-      hard: 1.5,
-      deadly: 2,
-    };
-    const difficultyThreshold = numPlayers * difficultyMultiplier[difficulty];
-  
-    let totalChallengeRating = 0;
-    const generatedMonsters = [];
-    while (totalChallengeRating < difficultyThreshold) {
-      if (filteredMonsters.length === 0) {
-        break;
-      }
-  
-      const randomIndex = Math.floor(Math.random() * filteredMonsters.length);
-      const selectedMonster = filteredMonsters[randomIndex];
-  
-      generatedMonsters.push(selectedMonster);
-  
-      totalChallengeRating += selectedMonster.challenge_rating;
-  
-      filteredMonsters.splice(randomIndex, 1);
-    }
-  
-    return generatedMonsters;
-  };
-
-  const handleDifficultySelection = (difficulty) => {
-    const generatedMonsters = generateMonsterSet(playerLevels, selectedTypes, difficulty);
-    setGeneratedMonsters(generatedMonsters);
-  };
-
-  return (
-    <>
-      {/* amount of players input */}
-      <div className="flex flex-col w-full border-opacity-50 items-center justify-center mt-8">
-        <div className="grid h-20 card bg-base-300 rounded-box place-items-center w-6/12 font-medium text-2xl">
-          Encounter Generator
-        </div>
-        {!isplayersSelected && (
-        <>
-          <div className="grid h-20 card bg-base-300 rounded-box place-items-center w-7/12 text-xl mt-8">
-            Please select which players to embark on the journey
+    return (
+      <>
+        <div className="flex flex-col w-full border-opacity-50 items-center justify-center mt-8">
+          <div className="grid h-20 card bg-base-300 rounded-box place-items-center w-6/12 font-medium text-2xl">
+            Encounter Generator
           </div>
-          <div className="divider"></div>
-          <div className="grid grid-cols-5 gap-5 py-16 px-16">
-            {characters.map((character) => (
-              <button
-              className={`btn btn-lg grid grid-cols-2 ${playerLevels.includes(character.level) ? 'btn-primary' : ''}`}
-              onClick={() => handlePlayerSelection(character.level)}
-              key={character.id}
-            >
-              <div>
-                <div>Level: {character.level}</div>
-                <div>Class: {character.class_type}</div>
-                <div>Race: {character.race}</div>
-                <div>Alignment: {character.alignment}</div>
+          {!isPlayersSelected && (
+            <>
+              <ul className="steps steps-vertical lg:steps-horizontal my-3">
+                <li className="step step-primary">Players</li>
+                <li className="step">Creature Types</li>
+                <li className="step">Difficulty</li>
+                <li className="step">Encounter</li>
+              </ul>
+              <div className="btn-group">
+                {characters.map((character) => (
+                  <button
+                    className={`btn btn-lg grid grid-cols-2 ${encounterData.level.includes(character.level) ? 'btn-primary' : ''}`}
+                    onClick={() => handlePlayerSelection(character.level)}
+                    key={character.id}
+                  >
+                    <div>
+                      <div>
+                        <h2 className="card-title">Name:</h2>
+                        <h2 className="card-title">Level: {character.level}</h2>
+                        <h2 className="card-title">Class: {character.class_type}</h2>
+                      </div>
+                    </div>
+                  </button>
+                ))}
               </div>
-            </button>
-            ))}
-          </div>
-          <div className="grid grid-cols-2 my-8 gap-5">
-            <input
-              type="text"
-              placeholder="Type here to search"
-              className="input input-warning w-full max-w-xs px-4"
-            />
+              <div className="grid grid-cols-1 my-8 gap-5">
+                <button
+                  className={`btn btn-outline btn-success px-4 ${encounterData.length === 0 ? 'btn-disabled' : ''}`}
+                  onClick={() => {
+                    setIsPlayersSelected(true);
+                    toast.success("Players selected");
+                  }}
+                  disabled={encounterData.length === 0}
+                >
+                  Continue
+                </button>
+              </div>
+            </>
+          )}
+          {isPlayersSelected && !isMonTypesSelected && (
+            <>
+                <ul className="steps steps-vertical lg:steps-horizontal my-3">
+                  <li className="step">Players</li>
+                  <li className="step step-primary">Creature Types</li>
+                  <li className="step">Difficulty</li>
+                  <li className="step">Encounter</li>
+                </ul>
+                <div className="grid h-20 card bg-base-300 rounded-box place-items-center w-7/12 text-xl mt-8 text-center">
+              Please select up to five<br />creature types
+            </div>
+            <div className="grid grid-cols-5 gap-5 my-8 mx-16">
             <button
-              className="btn btn-outline btn-success px-4"
-              onClick={() => handlePlayerSelection("player")}
+              className={`btn btn-lg ${encounterData.type && encounterData.type.includes("aberration") ? 'btn-primary' : ''}`}
+              onClick={() => handleTypeSelection("aberration")}
+            >
+              Aberration
+            </button>
+            <button
+              className={`btn btn-lg ${encounterData.type && encounterData.type.includes("beast") ? 'btn-primary' : ''}`}
+              onClick={() => handleTypeSelection("beast")}
+            >
+              Beast
+            </button>
+            <button
+              className={`btn btn-lg ${encounterData.type && encounterData.type.includes("celestial") ? 'btn-primary' : ''}`}
+              onClick={() => handleTypeSelection("celestial")}
+            >
+              Celestial
+            </button>
+            <button
+              className={`btn btn-lg ${encounterData.type && encounterData.type.includes("construct") ? 'btn-primary' : ''}`}
+              onClick={() => handleTypeSelection("construct")}
+            >
+              Construct
+            </button>
+            <button
+              className={`btn btn-lg ${encounterData.type && encounterData.type.includes("dragon") ? 'btn-primary' : ''}`}
+              onClick={() => handleTypeSelection("dragon")}
+            >
+              Dragon
+            </button>
+            <button
+              className={`btn btn-lg ${encounterData.type && encounterData.type.includes("elemental") ? 'btn-primary' : ''}`}
+              onClick={() => handleTypeSelection("elemental")}
+            >
+              Elemental
+            </button>
+            <button
+              className={`btn btn-lg ${encounterData.type && encounterData.type.includes("fey") ? 'btn-primary' : ''}`}
+              onClick={() => handleTypeSelection("fey")}
+            >
+              Fey
+            </button>
+            <button
+              className={`btn btn-lg ${encounterData.type && encounterData.type.includes("fiend") ? 'btn-primary' : ''}`}
+              onClick={() => handleTypeSelection("fiend")}
+            >
+              Fiend
+            </button>
+            <button
+              className={`btn btn-lg ${encounterData.type && encounterData.type.includes("giant") ? 'btn-primary' : ''}`}
+              onClick={() => handleTypeSelection("giant")}
+            >
+              Giant
+            </button>
+            <button
+              className={`btn btn-lg ${encounterData.type && encounterData.type.includes("humanoid") ? 'btn-primary' : ''}`}
+              onClick={() => handleTypeSelection("humanoid")}
+            >
+              Humanoid
+            </button>
+            <button
+              className={`btn btn-lg ${encounterData.type && encounterData.type.includes("monstrosity") ? 'btn-primary' : ''}`}
+              onClick={() => handleTypeSelection("monstrosity")}
+            >
+              Monstrosity
+            </button>
+            <button
+              className={`btn btn-lg ${encounterData.type && encounterData.type.includes("ooze") ? 'btn-primary' : ''}`}
+              onClick={() => handleTypeSelection("ooze")}
+            >
+              Ooze
+            </button>
+            <button
+              className={`btn btn-lg ${encounterData.type && encounterData.type.includes("plant") ? 'btn-primary' : ''}`}
+              onClick={() => handleTypeSelection("plant")}
+            >
+              Plant
+            </button>
+            <button
+              className={`btn btn-lg ${encounterData.type && encounterData.type.includes("undead") ? 'btn-primary' : ''}`}
+              onClick={() => handleTypeSelection("undead")}
+            >
+              Undead
+            </button>
+            <button
+              className={`btn btn-lg btn-outline btn-success px-4 ${encounterData.type && encounterData.type.length === 0 ? 'btn-disabled' : ''}`}
+              onClick={() => {
+                setIsMonTypesSelected(true);
+                toast.success("Creature types selected: " + (encounterData.type && encounterData.type.join(", ")));
+              }}
+              disabled={encounterData.type && encounterData.type.length === 0}
             >
               Continue
             </button>
-          </div>
-        </>
-        )}
-        {isplayersSelected && (
-          <>
-            {/* monster type input */}
-            <div className="grid h-20 card bg-base-300 rounded-box place-items-center w-7/12 text-xl mt-8 text-center">
-              Please select up to five<br />creature types
             </div>
-            <div className="grid grid-cols-5 gap-5 mt-8 mx-16">
-              <button
-                className={`btn ${selectedTypes.includes('Aberation') ? 'btn-primary' : ''}`}
-                onClick={() => handleTypeSelection('Aberation')}
-              >
-                Aberation
-              </button>
-              <button
-                className={`btn ${selectedTypes.includes('Beast') ? 'btn-primary' : ''}`}
-                onClick={() => handleTypeSelection('Beast')}
-              >
-                Beast
-              </button>
-              <button
-                className={`btn ${selectedTypes.includes('Celestial') ? 'btn-primary' : ''}`}
-                onClick={() => handleTypeSelection('Celestial')}
-              >
-                Celestial
-              </button>
-              <button
-                className={`btn ${selectedTypes.includes('Construct') ? 'btn-primary' : ''}`}
-                onClick={() => handleTypeSelection('Construct')}
-              >
-                Construct
-              </button>
-              <button
-                className={`btn ${selectedTypes.includes('Dragon') ? 'btn-primary' : ''}`}
-                onClick={() => handleTypeSelection('Dragon')}
-              >
-                Dragon
-              </button>
-              <button
-                className={`btn ${selectedTypes.includes('Elemental') ? 'btn-primary' : ''}`}
-                onClick={() => handleTypeSelection('Elemental')}
-              >
-                Elemental
-              </button>
-              <button
-                className={`btn ${selectedTypes.includes('Fey') ? 'btn-primary' : ''}`}
-                onClick={() => handleTypeSelection('Fey')}
-              >
-                Fey
-              </button>
-              <button
-                className={`btn ${selectedTypes.includes('Fiend') ? 'btn-primary' : ''}`}
-                onClick={() => handleTypeSelection('Fiend')}
-              >
-                Fiend
-              </button>
-              <button
-                className={`btn ${selectedTypes.includes('Giant') ? 'btn-primary' : ''}`}
-                onClick={() => handleTypeSelection('Giant')} 
-              >
-                Giant
-              </button>
-              <button
-                className={`btn ${selectedTypes.includes('Humanoid') ? 'btn-primary' : ''}`}
-                onClick={() => handleTypeSelection('Humanoid')}
-              >
-                Humanoid
-              </button>
-              <button
-                className={`btn ${selectedTypes.includes('Monstrosity') ? 'btn-primary' : ''}`}
-                onClick={() => handleTypeSelection('Monstrosity')}
-              >
-                Monstrosity
-              </button>
-              <button
-                className={`btn ${selectedTypes.includes('Ooze') ? 'btn-primary' : ''}`}
-                onClick={() => handleTypeSelection('Ooze')}
-              >
-                Ooze
-              </button>
-              <button
-                className={`btn ${selectedTypes.includes('Plant') ? 'btn-primary' : ''}`}
-                onClick={() => handleTypeSelection('Plant')} 
-              >
-                Plant
-              </button>
-              <button
-                className={`btn ${selectedTypes.includes('Undead') ? 'btn-primary' : ''}`}
-                onClick={() => handleTypeSelection('Undead')}
-              >
-                Undead
-              </button>
-            </div>
-
-              {selectedTypes.length > 0 && selectedTypes.length <= 5 && (
-                <button className="btn btn-outline btn-success px-4 my-4" onClick={handlePlayerSelection}>
-                  Continue
-                </button>
-              )}
-          {isplayersSelected && selectedTypes.length > 0 && (
-              <>
-                <div className="grid h-20 card bg-base-300 rounded-box place-items-center w-7/12 text-xl mt-8 text-center">
-                  Please select the desired difficulty level
-                </div>
-                <div className="grid grid-cols-4 gap-5 mt-8 mx-16">
-                  <button className="btn btn-outline" onClick={() => handleDifficultySelection('easy')}>Easy</button>
-                  <button className="btn btn-outline" onClick={() => handleDifficultySelection('medium')}>Medium</button>
-                  <button className="btn btn-outline" onClick={() => handleDifficultySelection('hard')}>Hard</button>
-                  <button className="btn btn-outline" onClick={() => handleDifficultySelection('deadly')}>Deadly</button>
-                </div>
-              </>
+            </>
             )}
-          </>
-        
-        )}
-      </div>
-    </>
-  );
+            {isMonTypesSelected && !isDifficultySelected && (
+              <>
+              <ul className="steps steps-vertical lg:steps-horizontal my-3">
+                  <li className="step">Players</li>
+                  <li className="step">Creature Types</li>
+                  <li className="step step-primary">Difficulty</li>
+                  <li className="step">Encounter</li>
+                </ul>
+              <div className="grid h-20 card bg-base-300 rounded-box place-items-center w-7/12 text-xl mt-8 text-center">
+              Please select the difficulty of the encounter
+              </div>
+                <div className="grid grid-cols-4 gap-5 my-8 mx-16">
+                <button
+                  className={`btn btn-lg ${encounterData.difficulty && encounterData.difficulty.includes("Easy") ? 'btn-primary' : 'btn-outline-primary'}`}
+                  onClick={() => handleDifficultySelection("Easy")}
+                >
+                  Easy
+                </button>
+                <button
+                  className={`btn btn-lg ${encounterData.difficulty && encounterData.difficulty.includes("Medium") ? 'btn-primary' : 'btn-outline-primary'}`}
+                  onClick={() => handleDifficultySelection("Medium")}
+                >
+                  Medium
+                </button>
+                <button
+                  className={`btn btn-lg ${encounterData.difficulty && encounterData.difficulty.includes("Hard") ? 'btn-primary' : 'btn-outline-primary'}`}
+                  onClick={() => handleDifficultySelection("Hard")}
+                >
+                  Hard
+                </button>
+                <button
+                  className={`btn btn-lg ${encounterData.difficulty && encounterData.difficulty.includes("Deadly") ? 'btn-primary' : 'btn-outline-primary'}`}
+                  onClick={() => handleDifficultySelection("Deadly")}
+                >
+                  Deadly
+                </button>
+                <button
+                  className={`btn btn-lg btn-outline btn-success px-4 ${encounterData.difficulty.length === 0 ? 'btn-disabled' : ''}`}
+                  onClick={() => {
+                    setIsDifficultySelected(true);
+                    handleGenerateEncounter();
+                    toast.success("Difficulty selected: " + (encounterData.difficulty && encounterData.difficulty.join(", ")));
+                  }}
+                  disabled={encounterData.difficulty.length === 0}
+                >
+                  Generate
+                </button>
+              </div>
+              </>
+              )}
+              {isDifficultySelected && (
+                <>
+                <ul className="steps steps-vertical lg:steps-horizontal my-3">
+                  <li className="step">Players</li>
+                  <li className="step">Creature Types</li>
+                  <li className="step">Difficulty</li>
+                  <li className="step step-primary">Encounter</li>
+                </ul>
+                <div className="grid h-20 card bg-base-300 rounded-box place-items-center w-7/12 text-xl mt-8 text-center">
+                Here are your monsters!
+                </div>
+                <div className="grid grid-cols-4 gap-5 my-8 mx-16">
+                  {generatedMonsters.map((monster, index) => (
+                    <div key={index} className="card bg-base-300 rounded-box place-items-center w-7/12 text-xl mt-8 text-center">
+                      <div className="card-body">
+                        <h2 className="card-title">{monster.name}</h2>
+                        <p className="card-text">{monster.size} {monster.type}</p>
+                        <p className="card-text">Challenge Rating: {monster.challenge_rating}</p>
+                        <p className="card-text">Armor Class: {monster.armor_class}</p>
+                        <p className="card-text">Hit Points: {monster.hit_points}</p>
+                        <p className="card-text">Strength: {monster.strength}</p>
+                        <p className="card-text">Dexterity: {monster.dexterity}</p>
+                        <p className="card-text">Constitution: {monster.constitution}</p>
+                        <p className="card-text">Intelligence: {monster.intelligence}</p>
+                        <p className="card-text">Wisdom: {monster.wisdom}</p>
+                        <p className="card-text">Charisma: {monster.charisma}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                </>
+              )}
+          {/* bottom */}
+        </div>
+      </>
+    );
 };
+    
 
 export default EncounterView;
+

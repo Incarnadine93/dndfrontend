@@ -104,7 +104,12 @@ const EncounterView = () => {
         {/* amount of players input */}
         </div>
         {!isplayersSelected && (
-            <>
+            <>  
+                <ul className="steps steps-vertical lg:steps-horizontal my-3">
+                  <li className="step step-primary">Players</li>
+                  <li className="step">Creature Types</li>
+                  <li className="step">Difficulty</li>
+                </ul>
                 <div className="grid h-20 card bg-base-300 rounded-box place-items-center w-7/12 text-xl mt-8">
                     Please select which players to embark on the journey
                 </div>
@@ -142,6 +147,11 @@ const EncounterView = () => {
             )}
             {isplayersSelected && (
             <>
+                <ul className="steps steps-vertical lg:steps-horizontal my-3">
+                  <li className="step">Players</li>
+                  <li className="step step-primary">Creature Types</li>
+                  <li className="step">Difficulty</li>
+                </ul>
                 <div className="grid h-20 card bg-base-300 rounded-box place-items-center w-7/12 text-xl mt-8 text-center">
               Please select up to five<br />creature types
             </div>
@@ -241,6 +251,11 @@ const EncounterView = () => {
             )}
             {isplayersSelected && selectedTypes.length > 0 && (
             <>
+                <ul className="steps steps-vertical lg:steps-horizontal my-3">
+                  <li className="step">Players</li>
+                  <li className="step">Creature Types</li>
+                  <li className="step step-primary">Difficulty</li>
+                </ul>
                 <div className="grid h-20 card bg-base-300 rounded-box place-items-center w-7/12 text-xl mt-8 text-center">
                   Please select the desired difficulty level
                 </div>
