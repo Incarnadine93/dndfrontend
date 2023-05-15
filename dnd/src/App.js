@@ -13,7 +13,7 @@ function App() {
   return (
     <div className="App">
       <Navbar />
-      <Toaster containerClassName="mt-16"  />
+      <Toaster position="bottom-center"  />
       <AppContainer>
         <Routes>
           <Route path="/" element={<HomeView />} />

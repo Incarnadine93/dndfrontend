@@ -2,10 +2,8 @@ import { useContext } from "react";
 import { AuthContext } from "../context/AuthProvider";
 import { Link } from "react-router-dom";
 import React, { useState, useEffect } from "react";
-import { ReactSearchAutocomplete } from 'react-search-autocomplete'
 import { WEB_URL } from "../lib/CONSTANTS";
 import axios from "axios";
-
 
 const Avatar = ({ user, logout }) => {
     return (
@@ -58,35 +56,7 @@ const Navbar = () => {
           getMonsters();
         }, []);
         
-      
-        const handleOnSearch = (string, results) => {
-          // onSearch will have as the first callback parameter
-          // the string searched and for the second the results.
-          console.log(string, results)
-        }
-      
-        const handleOnHover = (result) => {
-          // the item hovered
-          console.log(result)
-        }
-      
-        const handleOnSelect = (item) => {
-          // the item selected
-          console.log(item)
-        }
-      
-        const handleOnFocus = () => {
-          console.log('Focused')
-        }
-      
-        const formatResult = (item) => {
-          return (
-            <>
-              <span style={{ display: 'block', textAlign: 'left' }}>{item.data.name}</span>
-            </>
-          )
-        }
-
+        
         
     return(
         <div className="navbar bg-base-100 shadow-md shadow-orange-300">
@@ -109,26 +79,6 @@ const Navbar = () => {
                 <a href="/" className="btn btn-ghost normal-case text-xl">Bars & Brawls </a>
             </div>
             <div className="navbar-end">
-            <div className="App">
-              <input type="text" placeholder="Type here" className="input input-bordered input-warning w-full max-w-xs" />
-
-              {/* <header className="App-header mr-2">
-                <div style={{ width: 250 }}>
-                  <ReactSearchAutocomplete
-                    items={monsters}
-                    onSearch={handleOnSearch}
-                    onHover={handleOnHover}
-                    onSelect={handleOnSelect}
-                    onFocus={handleOnFocus}
-                    autoFocus
-                    formatResult={formatResult}
-                    styling={{ backgroundColor: "#444", color: "white"
-
-                    }}
-                  />
-                </div>
-              </header> */}
-            </div>
             {user.loggedIn ? (
           <Avatar user={user} logout={logout} />
         ) : (

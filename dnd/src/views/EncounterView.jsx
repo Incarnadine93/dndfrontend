@@ -106,39 +106,37 @@ const EncounterView = () => {
     };
 
     const handleGenerateEncounter = async () => {
-      console.log("encounterData");
-      console.log(encounterData);
     
       const numPlayers = encounterData.level.length;
-      console.log("numPlayers:", numPlayers);
     
       const avgLevel = Math.round(encounterData.level.reduce((a, b) => a + b, 0) / encounterData.level.length);
-      console.log("avgLevel:", avgLevel);
     
       const difficulty = encounterData.difficulty[0].toLowerCase();
-      console.log("difficulty:", difficulty);
     
-      console.log("xpThresholds:", xpThresholds);
       const difficultyXp = xpThresholds.data[avgLevel + 1][difficulty];
-      console.log("difficultyXp:", difficultyXp);
     
       const encounterXp = difficultyXp * numPlayers;
-      console.log("encounterXp:", encounterXp);
     
       const monTypes = encounterData.type;
-      console.log("monTypes:", monTypes);
-      console.log("monsters:", monsters.data)
-      const mons = monsters.data.filter((m) => monTypes.includes(m.type));
-      console.log("mons:", mons);
-      // const mons = monsters.filter((m) => monTypes.includes(m.type));
-      // console.log("mons:", mons);
+      // Get the list of monsters.
+      const mons = monsters.data.filter((m) => monTypes.includes(m.type) && m.xp <= encounterXp);
+
+      // Create an array to store the generated monsters.
+      const generatedMonsters = [];
+
+      // Get the total XP of the generated monsters.
+      let totalGeneratedXp = 0;
     
-      for (let m = 0; m < mons.length; m++) {
-        const monster = mons[m];
+      for (const monster of mons) {
         if (monster.xp <= encounterXp) {
-          setGeneratedMonsters((prevData) => [...prevData, monster]);
+          generatedMonsters.push(monster);
+          totalGeneratedXp += monster.xp;
         }
       }
+    
+      // Set the generated monsters.
+      setGeneratedMonsters(generatedMonsters);
+
     };
     
 
@@ -157,18 +155,19 @@ const EncounterView = () => {
                 <li className="step">Difficulty</li>
                 <li className="step">Encounter</li>
               </ul>
-              <div className="btn-group">
+              <div className="btn-group gap-2 justify-center">
                 {characters.map((character) => (
                   <button
-                    className={`btn btn-lg grid grid-cols-2 ${encounterData.level.includes(character.level) ? 'btn-primary' : ''}`}
+                    className={`btn h-auto w-full px-8 py-4 max-w-[350px] ${encounterData.level.includes(character.level) ? 'btn-primary' : ''}`}
                     onClick={() => handlePlayerSelection(character.level)}
                     key={character.id}
                   >
                     <div>
                       <div>
-                        <h2 className="card-title">Name:</h2>
+                        <h2 className="card-title">Name: {character.name}</h2>
                         <h2 className="card-title">Level: {character.level}</h2>
                         <h2 className="card-title">Class: {character.class_type}</h2>
+                        <h2 className="card-title">Race: {character.race} </h2>
                       </div>
                     </div>
                   </button>
@@ -358,9 +357,9 @@ const EncounterView = () => {
                 <div className="grid h-20 card bg-base-300 rounded-box place-items-center w-7/12 text-xl mt-8 text-center">
                 Here are your monsters!
                 </div>
-                <div className="grid grid-cols-4 gap-5 my-8 mx-16">
+                <div className="grid grid-cols-3 gap-5 my-8 mx-16">
                   {generatedMonsters.map((monster, index) => (
-                    <div key={index} className="card bg-base-300 rounded-box place-items-center w-7/12 text-xl mt-8 text-center">
+                    <div key={index} className="card bg-base-300 rounded-box place-items-center w-10/12 text-xl mt-8 text-left">
                       <div className="card-body">
                         <h2 className="card-title">{monster.name}</h2>
                         <p className="card-text">{monster.size} {monster.type}</p>
@@ -373,6 +372,9 @@ const EncounterView = () => {
                         <p className="card-text">Intelligence: {monster.intelligence}</p>
                         <p className="card-text">Wisdom: {monster.wisdom}</p>
                         <p className="card-text">Charisma: {monster.charisma}</p>
+                        <a href={`/monster/${monster.id}`} target="_blank">
+                          <button className="btn btn-outline btn-error">More Info</button>
+                        </a>
                       </div>
                     </div>
                   ))}
