@@ -155,7 +155,7 @@ const EncounterView = () => {
                 <li className="step">Difficulty</li>
                 <li className="step">Encounter</li>
               </ul>
-              <div className="btn-group gap-2 justify-center">
+              <div className="btn-group gap-2 grid grid-cols-3">
                 {characters.map((character) => (
                   <button
                     className={`btn h-auto w-full px-8 py-4 max-w-[350px] ${encounterData.level.includes(character.level) ? 'btn-primary' : ''}`}
@@ -283,17 +283,27 @@ const EncounterView = () => {
             >
               Undead
             </button>
-            <button
-              className={`btn btn-lg btn-outline btn-success px-4 ${encounterData.type && encounterData.type.length === 0 ? 'btn-disabled' : ''}`}
-              onClick={() => {
-                setIsMonTypesSelected(true);
-                toast.success("Creature types selected: " + (encounterData.type && encounterData.type.join(", ")));
-              }}
-              disabled={encounterData.type && encounterData.type.length === 0}
-            >
-              Continue
-            </button>
             </div>
+            <div className="my-8 grid grid-cols-2 gap-4 mx-auto">
+              <button
+                  className={`btn btn-lg btn-outline btn-error w-full`}
+                  onClick={() => {
+                    setIsPlayersSelected(false);
+                  }}
+                >
+                  Back
+              </button>
+              <button
+                className={`btn btn-lg btn-outline btn-success px-4 ${encounterData.type && encounterData.type.length === 0 ? 'btn-disabled' : ''}`}
+                onClick={() => {
+                  setIsMonTypesSelected(true);
+                  toast.success("Creature types selected: " + (encounterData.type && encounterData.type.join(", ")));
+                }}
+                disabled={encounterData.type && encounterData.type.length === 0}
+              >
+                Continue
+              </button>
+          </div>
             </>
             )}
             {isMonTypesSelected && !isDifficultySelected && (
@@ -332,17 +342,28 @@ const EncounterView = () => {
                 >
                   Deadly
                 </button>
-                <button
-                  className={`btn btn-lg btn-outline btn-success px-4 ${encounterData.difficulty.length === 0 ? 'btn-disabled' : ''}`}
-                  onClick={() => {
-                    setIsDifficultySelected(true);
-                    handleGenerateEncounter();
-                    toast.success("Difficulty selected: " + (encounterData.difficulty && encounterData.difficulty.join(", ")));
-                  }}
-                  disabled={encounterData.difficulty.length === 0}
-                >
-                  Generate
-                </button>
+                </div>
+                <div className="my-8 grid grid-cols-2 gap-4 mx-auto">
+                  <button
+                      className={`btn btn-lg btn-outline btn-error w-full ${encounterData.difficulty && encounterData.difficulty.length === 0 ? 'btn-disabled' : ''}`}
+                      onClick={() => {
+                        setIsMonTypesSelected(false);
+                      }}
+                      disabled={encounterData.difficulty && encounterData.difficulty.length === 0}
+                    >
+                      Back
+                  </button>
+                  <button
+                      className={`btn btn-lg btn-outline btn-success px-4 ${encounterData.difficulty.length === 0 ? 'btn-disabled' : ''}`}
+                      onClick={() => {
+                        setIsDifficultySelected(true);
+                        handleGenerateEncounter();
+                        toast.success("Difficulty selected: " + (encounterData.difficulty && encounterData.difficulty.join(", ")));
+                      }}
+                      disabled={encounterData.difficulty.length === 0}
+                    >
+                      Generate
+                  </button>
               </div>
               </>
               )}

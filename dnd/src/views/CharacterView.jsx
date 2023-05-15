@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 
 const CharacterView = () => {
   const { user } = useContext(AuthContext);
-  const [userData, setUserData] = useState([]);
+  const [userData, setUserData] = useState({ name: [], race: [], class_type: [], level: [], alignment: []});
   const [nameInput, setNameInput] = useState("");
   const [isNameSelected, setIsNameSelected] = useState(false);
   const [isRaceSelected, setIsRaceSelected] = useState(false);
@@ -211,11 +211,10 @@ const CharacterView = () => {
           </div>
           <div className="my-8 grid grid-cols-2 gap-4 mx-auto">
             <button
-                className={`btn btn-lg btn-outline btn-error w-full ${userData.race && userData.race.length === 0 ? 'btn-disabled' : ''}`}
+                className={`btn btn-lg btn-outline btn-error w-full`}
                 onClick={() => {
                   setIsNameSelected(false);
                 }}
-                disabled={userData.race && userData.race.length === 0}
               >
                 Back
             </button>
@@ -319,11 +318,10 @@ const CharacterView = () => {
           </div>
           <div className="my-8 grid grid-cols-2 gap-4 mx-auto">
             <button
-                className={`btn btn-lg btn-outline btn-error w-full ${userData.class_type && userData.class_type.length === 0 ? 'btn-disabled' : ''}`}
+                className={`btn btn-lg btn-outline btn-error w-full`}
                 onClick={() => {
-                  setIsClassSelected(false);
+                  setIsRaceSelected(false);
                 }}
-                disabled={userData.class_type && userData.class_type.length === 0}
               >
                 Back
             </button>
@@ -476,11 +474,10 @@ const CharacterView = () => {
           </div>
           <div className="my-8 grid grid-cols-2 gap-4 mx-auto">
             <button
-                className={`btn btn-lg btn-outline btn-error w-full ${userData.level && userData.level.length === 0 ? 'btn-disabled' : ''}`}
+                className={`btn btn-lg btn-outline btn-error w-full`}
                 onClick={() => {
                   setIsClassSelected(false);
                 }}
-                disabled={userData.level && userData.level.length === 0}
               >
                 Back
             </button>
